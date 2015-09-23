@@ -119,3 +119,30 @@ bool ModulePhysics::CleanUp()
 
 	return true;
 }
+/*
+void CreateCircle()
+{
+	b2BodyDef bodydef2;
+	bodydef2.type = b2_dynamicBody;
+	bodydef2.position.Set(PIXTOMET(App->input->GetMouseX()), PIXTOMET(App->input->GetMouseY()));
+	b2Body* body2 = world->CreateBody(&bodydef2);
+
+	b2CircleShape cShape2;
+	cShape2.m_radius = PIXTOMET(35);
+
+	b2FixtureDef fixture2;
+	fixture2.shape = &cShape2;
+	body2->CreateFixture(&fixture2);
+}
+void CreateCPolygon()
+{
+
+}
+void CreateEdge()
+{
+
+}
+void CreateChain()
+{
+
+}*/

@@ -19,4 +19,10 @@ private:
 	b2World* world;
 
 	bool debug;
+
+public:
+	void CreateCircle();
+	void CreateCPolygon();
+	void CreateEdge();
+	void CreateChain();
 };
