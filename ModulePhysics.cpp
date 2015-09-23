@@ -30,20 +30,8 @@ bool ModulePhysics::Start()
 	// - Remember to destroy the world after using it
 
 	// TODONE 4: Create a a big static circle as "ground"
-	b2BodyDef bodydef;
-	bodydef.type = b2_staticBody;
-	bodydef.position.Set(PIXTOMET(525), PIXTOMET(400));
-	
-	b2Body* body = world->CreateBody(&bodydef);
-	
-	
 
-	b2CircleShape cShape;
-	cShape.m_radius = PIXTOMET(225);
-
-	b2FixtureDef fixture;
-	fixture.shape = &cShape;
-	body->CreateFixture(&fixture);
+	CreateCircle(525, 400, 225, b2_staticBody);
 
 	return true;
 }
@@ -73,17 +61,7 @@ update_status ModulePhysics::PostUpdate()
 
 	if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
 	{
-		b2BodyDef bodydef2;
-		bodydef2.type = b2_dynamicBody;
-		bodydef2.position.Set(PIXTOMET(App->input->GetMouseX()), PIXTOMET(App->input->GetMouseY()));
-		b2Body* body2 = world->CreateBody(&bodydef2);
-
-		b2CircleShape cShape2;
-		cShape2.m_radius = PIXTOMET(35);
-
-		b2FixtureDef fixture2;
-		fixture2.shape = &cShape2;
-		body2->CreateFixture(&fixture2);
+		CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 35, b2_dynamicBody);
 	}
 	
 	for(b2Body* b = world->GetBodyList(); b; b = b->GetNext())
@@ -119,20 +97,20 @@ bool ModulePhysics::CleanUp()
 
 	return true;
 }
-/*
-void CreateCircle()
+
+void ModulePhysics::CreateCircle(int x, int y, int radius, b2BodyType bodyType)
 {
-	b2BodyDef bodydef2;
-	bodydef2.type = b2_dynamicBody;
-	bodydef2.position.Set(PIXTOMET(App->input->GetMouseX()), PIXTOMET(App->input->GetMouseY()));
-	b2Body* body2 = world->CreateBody(&bodydef2);
+	b2BodyDef bodydef;
+	bodydef.type = bodyType;
+	bodydef.position.Set(PIXTOMET(x), PIXTOMET(y));
+	b2Body* body = world->CreateBody(&bodydef);
 
-	b2CircleShape cShape2;
-	cShape2.m_radius = PIXTOMET(35);
+	b2CircleShape cShape;
+	cShape.m_radius = PIXTOMET(radius);
 
-	b2FixtureDef fixture2;
-	fixture2.shape = &cShape2;
-	body2->CreateFixture(&fixture2);
+	b2FixtureDef fixture;
+	fixture.shape = &cShape;
+	body->CreateFixture(&fixture);
 }
 void CreateCPolygon()
 {
@@ -145,4 +123,4 @@ void CreateEdge()
 void CreateChain()
 {
 
-}*/
+}
