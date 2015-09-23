@@ -69,6 +69,8 @@ update_status ModulePhysics::PostUpdate()
 
 	// Bonus code: this will iterate all objects in the world and draw the circles
 	// You need to provide your own macro to translate meters to pixels
+
+	if (App->input->GetKey(SDLK_ESCAPE) == KEY_DOWN){}
 	
 	for(b2Body* b = world->GetBodyList(); b; b = b->GetNext())
 	{

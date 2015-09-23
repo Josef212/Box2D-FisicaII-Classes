@@ -36,6 +36,12 @@ public:
 		return mouse_y;
 	}
 
+	void GetMousePosition(int& x, int& y)
+	{
+		x = mouse_x;
+		y = mouse_y;
+	}
+
 private:
 	KEY_STATE* keyboard;
 	int mouse_x;
