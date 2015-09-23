@@ -31,10 +31,10 @@ enum update_status
 #define VSYNC true
 #define TITLE "2D Physics Playground"
 #define GRAVITY_X 0.0f
-#define GRAVITY_Y -9.81f
+#define GRAVITY_Y 9.81f
 #define VELOCITY_ITERATIONS 6//8
 #define POSITION_ITERATION 2//3
 #define TIME_STEP 1.0f/60.0f
 
-#define PIXTOMET(pix) (pix*(1.0f/150.0f))
-#define METTOPIX(met) (met*150)
+#define PIXTOMET(pix) (pix*(1.0f/100.0f))
+#define METTOPIX(met) (met*100)
