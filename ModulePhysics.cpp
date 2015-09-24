@@ -59,7 +59,7 @@ update_status ModulePhysics::PostUpdate()
 	// Bonus code: this will iterate all objects in the world and draw the circles
 	// You need to provide your own macro to translate meters to pixels
 
-	if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
+	if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_REPEAT)
 	{
 		CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 35, b2_dynamicBody);
 	}
@@ -116,9 +116,22 @@ void CreateCPolygon()
 {
 
 }
-void CreateEdge()
+void CreateEdge(int x_start, int y_start, int x_end, int y_end, b2BodyType bodyType)
 {
+	b2BodyDef bodydef;
+	bodydef.type = bodyType;
+	bodydef.position.Set(PIXTOMET(x_start), PIXTOMET(y_start));
+	b2Body* body = world->CreateBody(&bodydef);
 
+	b2Vec2 v1(x_start, y_start);
+	b2Vec2 v2(x_end, y_end);
+
+	b2EdgeShape edge;
+	edge.Set(v1, v2);
+
+	b2FixtureDef fixture;
+	fixture.shape = &edge;
+	body->CreateFixture(&fixture);
 }
 void CreateChain()
 {
