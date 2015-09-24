@@ -116,7 +116,7 @@ void CreateCPolygon()
 {
 
 }
-void CreateEdge(int x_start, int y_start, int x_end, int y_end, b2BodyType bodyType)
+/*void CreateEdge(int x_start, int y_start, int x_end, int y_end, b2BodyType bodyType)
 {
 	b2BodyDef bodydef;
 	bodydef.type = bodyType;
@@ -132,7 +132,7 @@ void CreateEdge(int x_start, int y_start, int x_end, int y_end, b2BodyType bodyT
 	b2FixtureDef fixture;
 	fixture.shape = &edge;
 	body->CreateFixture(&fixture);
-}
+}*/
 void CreateChain()
 {
 
