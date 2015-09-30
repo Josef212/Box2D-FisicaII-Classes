@@ -62,86 +62,6 @@ update_status ModulePhysics::PreUpdate()
 // 
 update_status ModulePhysics::PostUpdate()
 {
-	// On space bar press, create a circle on mouse position
-	if (App->input->GetKey(SDL_SCANCODE_1) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_REPEAT)
-	{
-		CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 35, b2_dynamicBody);
-	}
-
-	if (App->input->GetKey(SDL_SCANCODE_2) == KEY_DOWN)
-	{
-		CreateBox(App->input->GetMouseX(), App->input->GetMouseY(), 30, 20, b2_dynamicBody);
-	}
-
-	if (App->input->GetKey(SDL_SCANCODE_3) == KEY_DOWN)
-	{
-		// TODO 3: Create a chain shape using those vertices
-		// remember to convert them from pixels to meters!
-
-		int point[24] =
-		{
-			-38, 80,
-			-44, -54,
-			-16, -60,
-			-16, -17,
-			19, -19,
-			19, -79,
-			61, -77,
-			57, 73,
-			17, 78,
-			20, 16,
-			-25, 13,
-			-9, 72
-		};
-
-		CreatePolygon(point, App->input->GetMouseX(), App->input->GetMouseY(), 24, b2_dynamicBody);
-		
-	}
-
-	if (App->input->GetKey(SDL_SCANCODE_4) == KEY_DOWN)
-	{
-		int rick_head[72] = {
-			112, 36,
-			95, 40,
-			93, 19,
-			88, 5,
-			83, 18,
-			75, 31,
-			41, 0,
-			42, 38,
-			13, 36,
-			29, 62,
-			0, 76,
-			30, 91,
-			10, 103,
-			31, 114,
-			25, 125,
-			40, 126,
-			35, 137,
-			46, 133,
-			53, 141,
-			64, 147,
-			76, 149,
-			86, 147,
-			94, 140,
-			99, 127,
-			106, 125,
-			105, 121,
-			100, 116,
-			102, 105,
-			110, 100,
-			105, 93,
-			109, 88,
-			110, 80,
-			109, 73,
-			117, 66,
-			107, 63,
-			105, 58
-		};
-
-		CreatePolygon(rick_head, App->input->GetMouseX(), App->input->GetMouseY(), 72, b2_dynamicBody);
-	}
-
 	if (App->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)
 		debug = !debug;
 
@@ -270,7 +190,7 @@ void ModulePhysics::CreateBox(int x_pos, int y_pos, int x_size, int y_size, b2Bo
 	b->CreateFixture(&fixture);
 }
 
-void ModulePhysics::CreatePolygon(int* points, int x, int y, int pointSize, b2BodyType bodyType)
+void ModulePhysics::CreateChain(int* points, int x, int y, int pointSize, b2BodyType bodyType)
 {
 	int vecSize = pointSize / 2;
 	b2Vec2* vec = new b2Vec2[vecSize];
@@ -310,7 +230,7 @@ void ModulePhysics::CreatePolygon(int* points, int x, int y, int pointSize, b2Bo
 	fixture.shape = &edge;
 	body->CreateFixture(&fixture);
 }*/
-void CreateChain()
+void ModulePhysics::CreatePolygon()
 {
 	
 }
@@ -332,12 +252,5 @@ world = new b2World(gravity);
 CreateCircle(525, 400, 225, b2_staticBody);
 
 return true;
-}
-*/
-
-/*
-if (App->input->GetKey(SDL_SCANCODE_1) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_REPEAT)
-{
-CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 35, b2_dynamicBody);
 }
 */
