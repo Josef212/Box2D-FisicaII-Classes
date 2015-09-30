@@ -23,7 +23,7 @@ private:
 
 public:
 	void CreateCircle(int x, int y, int radius, b2BodyType bodyType);
-	void CreateCPolygon();
+	void CreatePolygon();
 	//void CreateEdge(int x_start, int y_start, int x_end, int y_end, b2BodyType bodyType);
 	void CreateChain();
 };

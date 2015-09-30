@@ -30,6 +30,7 @@ enum update_status
 #define WIN_FULLSCREEN_DESKTOP false
 #define VSYNC true
 #define TITLE "2D Physics Playground"
+
 #define GRAVITY_X 0.0f
 #define GRAVITY_Y 9.81f
 #define VELOCITY_ITERATIONS 6//8
