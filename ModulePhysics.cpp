@@ -273,7 +273,7 @@ void ModulePhysics::CreateBox(int x_pos, int y_pos, int x_size, int y_size, b2Bo
 void ModulePhysics::CreatePolygon(int* points, int x, int y, int pointSize, b2BodyType bodyType)
 {
 	int vecSize = pointSize / 2;
-	b2Vec2 vec[1000];
+	b2Vec2* vec = new b2Vec2[vecSize];
 	for (int i = 0; i < vecSize; i++)
 	{
 		vec[i].Set(PIXTOMET(points[2 * i]), PIXTOMET(points[2 * i + 1]));
