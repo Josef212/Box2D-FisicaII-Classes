@@ -1,11 +1,17 @@
 #include "Globals.h"
 #include "Application.h"
+#include "ModuleInput.h"
+#include "ModuleRender.h"
 #include "ModulePhysics.h"
 #include "math.h"
 
-// TODONE 1: Include Box 2 header and library
 #include "Box2D/Box2D/Box2D.h"
-#pragma comment(lib, "Box2D/libx86/Debug/Box2D.lib")
+
+#ifdef _DEBUG
+#pragma comment( lib, "Box2D/libx86/Debug/Box2D.lib" )
+#else
+#pragma comment( lib, "Box2D/libx86/Release/Box2D.lib" )
+#endif
 
 ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
@@ -22,16 +28,25 @@ bool ModulePhysics::Start()
 {
 	LOG("Creating Physics 2D environment");
 
-	// TODONE 2: Create a private variable for the world
-	// - You need to send it a default gravity
-	b2Vec2 gravity(GRAVITY_X, GRAVITY_Y);
-	// - You need init the world in the constructor
-	world = new b2World(gravity);
-	// - Remember to destroy the world after using it
+	world = new b2World(b2Vec2(GRAVITY_X, GRAVITY_Y));
 
-	// TODONE 4: Create a a big static circle as "ground"
+	// big static circle as "ground" in the middle of the screen
+	int x = SCREEN_WIDTH / 2;
+	int y = SCREEN_HEIGHT / 1.5f;
+	int diameter = SCREEN_WIDTH / 2;
 
-	CreateCircle(525, 400, 225, b2_staticBody);
+	b2BodyDef body;
+	body.type = b2_staticBody;
+	body.position.Set(PIXTOMET(x), PIXTOMET(y));
+
+	b2Body* b = world->CreateBody(&body);
+
+	b2CircleShape shape;
+	shape.m_radius = PIXTOMET(diameter) * 0.5f;
+
+	b2FixtureDef fixture;
+	fixture.shape = &shape;
+	b->CreateFixture(&fixture);
 
 	return true;
 }
@@ -39,49 +54,23 @@ bool ModulePhysics::Start()
 // 
 update_status ModulePhysics::PreUpdate()
 {
-	// TODONE 3: Update the simulation ("step" the world)
-	world->Step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATION);
+	world->Step(1.0f / 60.0f, 6, 2);
+
 	return UPDATE_CONTINUE;
 }
 
 // 
 update_status ModulePhysics::PostUpdate()
 {
-	// TODONE 5: On space bar press, create a circle on mouse position
-	// - You need to transform the position / radius
-
-	if(App->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)
-		debug = !debug;
-
-	if(!debug)
-		return UPDATE_CONTINUE;
-
-	// Bonus code: this will iterate all objects in the world and draw the circles
-	// You need to provide your own macro to translate meters to pixels
-
+	// On space bar press, create a circle on mouse position
 	if (App->input->GetKey(SDL_SCANCODE_1) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_REPEAT)
 	{
 		CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 35, b2_dynamicBody);
 	}
-	// TODO 1: When pressing 2, create a box on the mouse position
+
 	if (App->input->GetKey(SDL_SCANCODE_2) == KEY_DOWN)
 	{
-		b2BodyDef body;
-		body.type = b2_dynamicBody;
-		float radius = PIXTOMET(25);
-		body.position.Set(METTOPIX(App->input->GetMouseX()), METTOPIX(App->input->GetMouseY()));
-		
-		b2Body* b = world->CreateBody(&body);
-
-		b2PolygonShape shape;
-		shape.SetAsBox(METTOPIX(20), METTOPIX(10));
-		b2FixtureDef fixture;
-		fixture.shape = &shape;
-
-		// TODO 2: To have the box behave normally, set fixture's density to 1.0f
-		fixture.density = 1.0f;
-
-		b->CreateFixture(&fixture);
+		CreateBox(App->input->GetMouseX(), App->input->GetMouseY(), 30, 20, b2_dynamicBody);
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_3) == KEY_DOWN)
@@ -105,29 +94,60 @@ update_status ModulePhysics::PostUpdate()
 			-9, 72
 		};
 
-		b2Vec2 vec[12];
-		for (int i = 0; i < 12; i++)
-		{
-			vec[i].Set(METTOPIX(point[2 * i]), METTOPIX(point[2 * i + 1]));
-		}
-
-		b2BodyDef body;
-		body.type = b2_dynamicBody;
-		float radius = METTOPIX(25);
-		body.position.Set(METTOPIX(App->input->GetMouseX()), METTOPIX(App->input->GetMouseY()));
-
-		b2Body* b = world->CreateBody(&body);
-
-		b2ChainShape shape;
-		shape.CreateLoop(vec, 12);
-		b2FixtureDef fixture;
-		fixture.shape = &shape;
-
-		b->CreateFixture(&fixture);
-
+		CreatePolygon(point, App->input->GetMouseX(), App->input->GetMouseY(), 24, b2_dynamicBody);
+		
 	}
-	
-	
+
+	if (App->input->GetKey(SDL_SCANCODE_4) == KEY_DOWN)
+	{
+		int rick_head[72] = {
+			112, 36,
+			95, 40,
+			93, 19,
+			88, 5,
+			83, 18,
+			75, 31,
+			41, 0,
+			42, 38,
+			13, 36,
+			29, 62,
+			0, 76,
+			30, 91,
+			10, 103,
+			31, 114,
+			25, 125,
+			40, 126,
+			35, 137,
+			46, 133,
+			53, 141,
+			64, 147,
+			76, 149,
+			86, 147,
+			94, 140,
+			99, 127,
+			106, 125,
+			105, 121,
+			100, 116,
+			102, 105,
+			110, 100,
+			105, 93,
+			109, 88,
+			110, 80,
+			109, 73,
+			117, 66,
+			107, 63,
+			105, 58
+		};
+
+		CreatePolygon(rick_head, App->input->GetMouseX(), App->input->GetMouseY(), 72, b2_dynamicBody);
+	}
+
+	if (App->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)
+		debug = !debug;
+
+	if (!debug)
+		return UPDATE_CONTINUE;
+
 	// Bonus code: this will iterate all objects in the world and draw the circles
 	// You need to provide your own macro to translate meters to pixels
 	for (b2Body* b = world->GetBodyList(); b; b = b->GetNext())
@@ -215,6 +235,7 @@ bool ModulePhysics::CleanUp()
 	return true;
 }
 
+
 void ModulePhysics::CreateCircle(int x, int y, int radius, b2BodyType bodyType)
 {
 	b2BodyDef bodydef;
@@ -229,10 +250,49 @@ void ModulePhysics::CreateCircle(int x, int y, int radius, b2BodyType bodyType)
 	fixture.shape = &cShape;
 	body->CreateFixture(&fixture);
 }
-void CreatePolygon()
-{
 
+void ModulePhysics::CreateBox(int x_pos, int y_pos, int x_size, int y_size, b2BodyType bodyType)
+{
+	b2BodyDef body;
+	body.type = bodyType;
+	body.position.Set(PIXTOMET(x_pos), PIXTOMET(y_pos));
+
+	b2Body* b = world->CreateBody(&body);
+
+	b2PolygonShape shape;
+	shape.SetAsBox(PIXTOMET(x_size), PIXTOMET(y_size));
+	b2FixtureDef fixture;
+	fixture.shape = &shape;
+
+	// TODO 2: To have the box behave normally, set fixture's density to 1.0f
+	fixture.density = 1.0f;
+
+	b->CreateFixture(&fixture);
 }
+
+void ModulePhysics::CreatePolygon(int* points, int x, int y, int pointSize, b2BodyType bodyType)
+{
+	int vecSize = pointSize / 2;
+	b2Vec2 vec[1000];
+	for (int i = 0; i < vecSize; i++)
+	{
+		vec[i].Set(PIXTOMET(points[2 * i]), PIXTOMET(points[2 * i + 1]));
+	}
+
+	b2BodyDef body;
+	body.type = bodyType;
+	body.position.Set(PIXTOMET(x), PIXTOMET(y));
+
+	b2Body* b = world->CreateBody(&body);
+
+	b2ChainShape shape;
+	shape.CreateLoop(vec, vecSize);
+	b2FixtureDef fixture;
+	fixture.shape = &shape;
+
+	b->CreateFixture(&fixture);
+}
+
 /*void CreateEdge(int x_start, int y_start, int x_end, int y_end, b2BodyType bodyType)
 {
 	b2BodyDef bodydef;
@@ -254,3 +314,30 @@ void CreateChain()
 {
 	
 }
+
+/*
+bool ModulePhysics::Start()
+{
+LOG("Creating Physics 2D environment");
+
+// TODONE 2: Create a private variable for the world
+// - You need to send it a default gravity
+b2Vec2 gravity(GRAVITY_X, GRAVITY_Y);
+// - You need init the world in the constructor
+world = new b2World(gravity);
+// - Remember to destroy the world after using it
+
+// TODONE 4: Create a a big static circle as "ground"
+
+CreateCircle(525, 400, 225, b2_staticBody);
+
+return true;
+}
+*/
+
+/*
+if (App->input->GetKey(SDL_SCANCODE_1) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_REPEAT)
+{
+CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 35, b2_dynamicBody);
+}
+*/

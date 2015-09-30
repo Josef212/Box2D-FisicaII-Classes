@@ -3,6 +3,7 @@
 #include "Globals.h"
 
 class b2World;
+class b2Vec2;
 enum b2BodyType;
 
 class ModulePhysics : public Module
@@ -23,7 +24,8 @@ private:
 
 public:
 	void CreateCircle(int x, int y, int radius, b2BodyType bodyType);
-	void CreatePolygon();
+	void CreateBox(int x_pos, int y_pos, int x_size, int y_size, b2BodyType bodyType);
+	void CreatePolygon(int* points, int x, int y, int pointSize, b2BodyType bodyType);
 	//void CreateEdge(int x_start, int y_start, int x_end, int y_end, b2BodyType bodyType);
 	void CreateChain();
 };
