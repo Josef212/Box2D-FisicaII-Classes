@@ -1,12 +1,17 @@
 #include "Globals.h"
 #include "Application.h"
+#include "ModuleRender.h"
 #include "ModuleSceneIntro.h"
-#include "Box2D\Box2D\Box2D.h"
-
+#include "ModuleInput.h"
+#include "ModuleTextures.h"
+#include "ModuleAudio.h"
+#include "ModulePhysics.h"
 
 ModuleSceneIntro::ModuleSceneIntro(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
-	graphics = NULL;
+	circle = box = rick = NULL;
+	ray_on = false;
+	sensed = false;
 }
 
 ModuleSceneIntro::~ModuleSceneIntro()
@@ -19,6 +24,13 @@ bool ModuleSceneIntro::Start()
 	bool ret = true;
 
 	App->renderer->camera.x = App->renderer->camera.y = 0;
+
+	circle = App->textures->Load("pinball/wheel.png"); 
+	box = App->textures->Load("pinball/crate.png");
+	rick = App->textures->Load("pinball/rick_head.png");
+	bonus_fx = App->audio->LoadFx("pinball/bonus.wav");
+
+	sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_WIDTH, 50);
 
 	return ret;
 }
@@ -34,81 +46,144 @@ bool ModuleSceneIntro::CleanUp()
 // Update: draw background
 update_status ModuleSceneIntro::Update()
 {
-	if (App->input->GetKey(SDL_SCANCODE_1) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_REPEAT)
+	if(App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
 	{
-		App->physics->CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 35, b2_dynamicBody);
+		ray_on = !ray_on;
+		ray.x = App->input->GetMouseX();
+		ray.y = App->input->GetMouseY();
 	}
 
-	if (App->input->GetKey(SDL_SCANCODE_2) == KEY_DOWN)
+	if(App->input->GetKey(SDL_SCANCODE_1) == KEY_DOWN)
 	{
-		App->physics->CreateBox(App->input->GetMouseX(), App->input->GetMouseY(), 30, 20, b2_dynamicBody);
+		circles.add(App->physics->CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 25));
+		circles.getLast()->data->listener = this;
 	}
 
-	if (App->input->GetKey(SDL_SCANCODE_3) == KEY_DOWN)
+	if(App->input->GetKey(SDL_SCANCODE_2) == KEY_DOWN)
 	{
-		int point[24] =
-		{
-			-38, 80,
-			-44, -54,
-			-16, -60,
-			-16, -17,
-			19, -19,
-			19, -79,
-			61, -77,
-			57, 73,
-			17, 78,
-			20, 16,
-			-25, 13,
-			-9, 72
-		};
-
-		App->physics->CreateChain(point, App->input->GetMouseX(), App->input->GetMouseY(), 24, b2_dynamicBody);
-
+		boxes.add(App->physics->CreateRectangle(App->input->GetMouseX(), App->input->GetMouseY(), 100, 50));
 	}
 
-	if (App->input->GetKey(SDL_SCANCODE_4) == KEY_DOWN)
+	if(App->input->GetKey(SDL_SCANCODE_3) == KEY_DOWN)
 	{
-		int rick_head[72] = {
-			112, 36,
-			95, 40,
-			93, 19,
-			88, 5,
-			83, 18,
-			75, 31,
-			41, 0,
-			42, 38,
-			13, 36,
-			29, 62,
-			0, 76,
-			30, 91,
-			10, 103,
-			31, 114,
-			25, 125,
-			40, 126,
-			35, 137,
-			46, 133,
-			53, 141,
-			64, 147,
-			76, 149,
-			86, 147,
-			94, 140,
-			99, 127,
-			106, 125,
-			105, 121,
-			100, 116,
-			102, 105,
-			110, 100,
-			105, 93,
-			109, 88,
-			110, 80,
+		// Pivot 0, 0
+		int rick_head[64] = {
+			14, 36,
+			42, 40,
+			40, 0,
+			75, 30,
+			88, 4,
+			94, 39,
+			111, 36,
+			104, 58,
+			107, 62,
+			117, 67,
 			109, 73,
-			117, 66,
-			107, 63,
-			105, 58
+			110, 85,
+			106, 91,
+			109, 99,
+			103, 104,
+			100, 115,
+			106, 121,
+			103, 125,
+			98, 126,
+			95, 137,
+			83, 147,
+			67, 147,
+			53, 140,
+			46, 132,
+			34, 136,
+			38, 126,
+			23, 123,
+			30, 114,
+			10, 102,
+			29, 90,
+			0, 75,
+			30, 62
 		};
 
-		App->physics->CreateChain(rick_head, App->input->GetMouseX(), App->input->GetMouseY(), 72, b2_dynamicBody);
+		ricks.add(App->physics->CreateChain(App->input->GetMouseX(), App->input->GetMouseY(), rick_head, 64));
+	}
+
+	// Prepare for raycast ------------------------------------------------------
+	
+	iPoint mouse;
+	mouse.x = App->input->GetMouseX();
+	mouse.y = App->input->GetMouseY();
+	int ray_hit = ray.DistanceTo(mouse);
+
+	fVector normal(0.0f, 0.0f);
+
+	// All draw functions ------------------------------------------------------
+	p2List_item<PhysBody*>* c = circles.getFirst();
+
+	while(c != NULL)
+	{
+		int x, y;
+		c->data->GetPosition(x, y);
+		if(c->data->Contains(App->input->GetMouseX(), App->input->GetMouseY()))
+			App->renderer->Blit(circle, x, y, NULL, 1.0f, c->data->GetRotation());
+		c = c->next;
+	}
+
+	c = boxes.getFirst();
+
+	while(c != NULL)
+	{
+		int x, y;
+		c->data->GetPosition(x, y);
+		App->renderer->Blit(box, x, y, NULL, 1.0f, c->data->GetRotation());
+		if(ray_on)
+		{
+			int hit = c->data->RayCast(ray.x, ray.y, mouse.x, mouse.y, normal.x, normal.y);
+			if(hit >= 0)
+				ray_hit = hit;
+		}
+		c = c->next;
+	}
+
+	c = ricks.getFirst();
+
+	while(c != NULL)
+	{
+		int x, y;
+		c->data->GetPosition(x, y);
+		App->renderer->Blit(rick, x, y, NULL, 1.0f, c->data->GetRotation());
+		c = c->next;
+	}
+
+	// ray -----------------
+	if(ray_on == true)
+	{
+		fVector destination(mouse.x-ray.x, mouse.y-ray.y);
+		destination.Normalize();
+		destination *= ray_hit;
+
+		App->renderer->DrawLine(ray.x, ray.y, ray.x + destination.x, ray.y + destination.y, 255, 255, 255);
+
+		if(normal.x != 0.0f)
+			App->renderer->DrawLine(ray.x + destination.x, ray.y + destination.y, ray.x + destination.x + normal.x * 25.0f, ray.y + destination.y + normal.y * 25.0f, 100, 255, 100);
 	}
 
 	return UPDATE_CONTINUE;
+}
+
+void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
+{
+	int x, y;
+
+	App->audio->PlayFx(bonus_fx);
+
+	/*
+	if(bodyA)
+	{
+		bodyA->GetPosition(x, y);
+		App->renderer->DrawCircle(x, y, 50, 100, 100, 100);
+	}
+
+	if(bodyB)
+	{
+		bodyB->GetPosition(x, y);
+		App->renderer->DrawCircle(x, y, 50, 100, 100, 100);
+	}*/
 }

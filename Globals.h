@@ -22,7 +22,7 @@ enum update_status
 
 // Configuration -----------
 #define SCREEN_WIDTH 1024
-#define SCREEN_HEIGHT 758
+#define SCREEN_HEIGHT 768
 #define SCREEN_SIZE 1
 #define WIN_FULLSCREEN false
 #define WIN_RESIZABLE false
@@ -30,12 +30,3 @@ enum update_status
 #define WIN_FULLSCREEN_DESKTOP false
 #define VSYNC true
 #define TITLE "2D Physics Playground"
-
-#define GRAVITY_X 0.0f
-#define GRAVITY_Y 9.81f
-#define VELOCITY_ITERATIONS 6//8
-#define POSITION_ITERATION 2//3
-#define TIME_STEP 1.0f/60.0f
-
-#define PIXTOMET(pix) (pix*(1.0f/100.0f))
-#define METTOPIX(met) (met*100)
